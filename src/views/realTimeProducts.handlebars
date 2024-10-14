@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Products</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Productos en Tiempo Real</h1>
+        
+        {{!-- Área para mostrar mensajes de estado --}}
+        <div id="statusMessage" style="color: red;"></div>
+
+        <div>
+            <table>
+                <thead>
+                    <tr>
+    
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th>Código</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Categoría</th>
+                        <th>Thumbnail</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="productList">
+                    {{#each products}}
+                        <tr>
+                         
+                            <td>{{this.title}}</td>
+                            <td>{{this.description}}</td>
+                            <td>{{this.code}}</td>
+                            <td>{{this.price}}</td>
+                            <td>{{this.stock}}</td>
+                            <td>{{this.category}}</td>
+                            <td><img src="{{this.thumbnails}}" alt="Thumbnail" style="max-width: 100px; max-height: 100px;"></td>
+                            <td>{{this.status}}</td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+
+        {{!-- Formulario para agregar un producto --}}
+        <form id="addProductForm">
+            <table>
+                <tr>
+                    <td><label for="title">Título:</label></td>
+                    <td><input type="text" id="title" name="title" required></td>
+                </tr>
+                <tr>
+                    <td><label for="description">Descripción:</label></td>
+                    <td><input type="text" id="description" name="description" required></td>
+                </tr>
+                <tr>
+                    <td><label for="price">Precio:</label></td>
+                    <td><input type="number" id="price" name="price" required></td>
+                </tr>
+                <tr>
+                    <td><label for="code">Código:</label></td>
+                    <td><input type="text" id="code" name="code" required></td>
+                </tr>
+                <tr>
+                    <td><label for="stock">Stock:</label></td>
+                    <td><input type="number" id="stock" name="stock" required></td>
+                </tr>
+                <tr>
+                    <td><label for="category">Categoría:</label></td>
+                    <td>
+                        <select id="category" name="category" required>
+                            <option value="" disabled selected>Selecciona una categoría</option>
+                            <option value="nuecesysemillas">nuecesysemillas</option>
+                            <option value="frutossecos">frutossecos</option>
+                            <option value="legumbresseca">legumbressecas</option>
+                            <option value="frutossecostostados">frutossecostostados</option>
+                            <option value="mixfrutossecos">Nueces</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="thumbnail">Thumbnail:</label></td>
+                    <td><input type="text" id="thumbnail" name="thumbnail"></td>
+                </tr>
+                 <tr></tr>
+                    <td><label for="status">Status:</label></td>
+                    <td><input type="boolean" id="status" name="status" value="true"></td>
+                </tr>
+               
+            </table>
+            <button type="submit">Agregar Producto</button>
+           {{!-- Botón para eliminar producto --}}
+            <button type="button" id="deleteProductButton">Eliminar Producto</button>
+        </form>
+
+        {{!-- Campo para ingresar el ID del producto a eliminar --}}
+        <div>
+            <label for="deleteProductId">ID del Producto a Eliminar:</label>
+            <input type="text" id="deleteProductId" name="deleteProductId">
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Manejar el envío del formulario para agregar producto
+        document.getElementById('addProductForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            // Obtener los datos del formulario
+            const formData = new FormData(event.target);
+            const product = {};
+            formData.forEach((value, key) => {
+                if (key === 'stock'){
+                    product[key] = parseFloat(value);
+                } else {
+                    product[key] = value;
+                }
+            });
+   
+            // Enviar el producto al servidor
+            socket.emit('productAdded', product);
+
+            // Limpiar el formulario
+            event.target.reset();
+        });
+
+        // Manejar el clic en el botón de eliminar producto
+        document.getElementById('deleteProductButton').addEventListener('click', () => {
+            const productId = document.getElementById('deleteProductId').value;
+            if (productId) {
+                socket.emit('productDeleted',(productId));
+                // Limpiar el campo de ID
+                document.getElementById('deleteProductId').value = ''; 
+            }
+        });
+
+        socket.on('updateProducts', ({ products, message }) => {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+
+            products.forEach(product => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${product.title}</td>
+                    <td>${product.description}</td>
+                    <td>${product.code}</td>
+                    <td>${product.price}</td>
+                    <td>${product.stock}</td>
+                    <td>${product.category}</td>
+                    <td><img src="${product.thumbnails}" alt="Thumbnail" style="max-width: 100px; max-height: 100px;"></td>
+                    <td>${product.status}</td>
+                `;
+                productList.appendChild(tr);
+            });
+
+            // Mostrar mensaje de éxito o error si existe
+            const statusMessage = document.getElementById('statusMessage');
+            if (message) {
+                statusMessage.textContent = message;
+                statusMessage.style.display = 'block';
+
+                // Ocultar el mensaje después de 10 segundos
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 10000); 
+            }
+        });
+    </script>
+</body>
+</html>

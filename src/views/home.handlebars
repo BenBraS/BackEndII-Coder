@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+   <script src="/js/cart.js" defer></script> 
+</head>
+<body>
+    <div>
+        <h1>Lista de Productos</h1>
+     <!-- Formulario para filtrar por categoría -->
+    <form method="GET" action="/">
+        <label for="category">Filtrar por categoría:</label>
+        <select name="category" id="category">
+            <option value="">Todas</option>
+            <option value="nuecesysemillas" {{#if (eq category 'nuecesysemillas')}}selected{{/if}}>Nueces y Semillas</option>
+            <option value="frutossecos" {{#if (eq category 'frutossecos')}}selected{{/if}}>Frutos Secos</option>
+            <option value="legumbressecas" {{#if (eq category 'legumbressecas')}}selected{{/if}}>Legumbres Secas</option>
+            <option value="frutossecostostados" {{#if (eq category 'frutossecostostados')}}selected{{/if}}>Frutos Secos Tostados</option>
+            <option value="mixfrutossecos" {{#if (eq category 'mixfrutossecos')}}selected{{/if}}>Mix Frutos Secos</option>
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+        <table>
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>Código</th>
+                    <!-- Enlaces de orden con todos los parámetros y filtros -->
+                    <th>
+                    <a href="?category={{category}}&page={{result.page}}&limit={{result.limit}}&sort=price&order=asc">
+        Precio (Ascendente)
+                    </a> | 
+                    <a href="?category={{category}}&page={{result.page}}&limit={{result.limit}}&sort=price&order=desc">
+        Precio (Descendente)
+                    </a>
+                    </th>
+
+                    <th>Stock</th>
+                    <th>Categoría</th>
+                    <th>Thumbnail</th>
+                    <th>Status</th>
+                    <th>Acciones</th> <!-- Nueva columna para botones -->
+                </tr>
+            </thead>
+            <tbody>
+                {{#each result.docs}}
+                    <tr>
+                        <td>{{this.title}}</td>
+                        <td>{{this.description}}</td>
+                        <td>{{this.code}}</td>
+                        <td>{{this.price}}</td>
+                        <td>{{this.stock}}</td>
+                        <td>{{this.category}}</td>
+                        <td><img src="{{this.thumbnails}}" alt="Thumbnail" style="max-width: 100px; max-height: 100px;"></td>
+                        <td>{{this.status}}</td>
+                        <td>
+                            <button onclick="updateProductQuantity('{{this._id}}', 1)">+</button>
+                            <button onclick="updateProductQuantity('{{this._id}}', -1)">-</button>
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+  <!-- Paginación -->
+<div>
+    {{#if result.hasPrevPage}}
+        <a href="?category={{category}}&sort={{sort}}&order={{order}}&page={{result.prevPage}}&limit={{result.limit}}">
+            Anterior
+        </a>
+    {{/if}}
+
+    <span>Página {{result.page}} de {{result.totalPages}}</span>
+
+    {{#if result.hasNextPage}}
+        <a href="?category={{category}}&sort={{sort}}&order={{order}}&page={{result.nextPage}}&limit={{result.limit}}">
+            Siguiente
+        </a>
+    {{/if}}
+</div>
+
+         <h2>Productos en el Carrito</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>Código</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody id="cart-products">
+                <!-- Los productos del carrito se llenarán aquí -->
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
