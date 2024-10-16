@@ -18,7 +18,6 @@ router.get('/register', (req, res) => {
 });
 
 // Endpoint /register: Crear un nuevo usuario y asociar carrito
-// Endpoint /register: Crear un nuevo usuario y asociar carrito
 router.post('/register', async (req, res) => {
     try {
         const { first_name, last_name, email, age, password } = req.body;
@@ -140,8 +139,8 @@ router.get('/current', passport.authenticate('current', { session: false }), asy
         return res.status(401).send({ message: 'No estás autenticado' });
       }
       
-      // Aquí, req.user debe contener el usuario autenticado
-      const user = req.user;  // El usuario autenticado se obtiene de `req.user` gracias a Passport
+      // Aquí req.user debe contener el usuario autenticado
+      const user = req.user;  // El usuario autenticado se obtiene de 'req.user' gracias a Passport
       res.status(200).send({
         message: 'Usuario autenticado',
         user,
