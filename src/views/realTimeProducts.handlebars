@@ -4,48 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real-Time Products</title>
+<style>
+    /* Estilos para el contenedor y las tarjetas de productos */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .product-card {
+        width: 200px;
+        height: auto; /* Cambié la altura a auto para que se ajuste al contenido */
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 10px; /* Ajusté el padding para mayor espacio */
+        overflow: hidden;
+    }
+    .product-card img {
+        width: 50px;
+        height: 50px;
+        border-radius: 2px;
+        margin-bottom: 5px; /* Ajusté el margen entre la imagen y el contenido */
+        object-fit: contain;
+    }
+    .product-title {
+        font-size: 0.9em; /* Ajusté el tamaño del título */
+        font-weight: bold;
+        margin: 5px 0; /* Ajusté el margen */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .product-info {
+        font-size: 0.8em; /* Ajusté el tamaño del texto */
+        margin: 5px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .product-details {
+        display: flex;
+        flex-direction: column; /* Asegura que el precio y el código estén en una columna */
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .product-code {
+        font-size: 0.7em; /* Tamaño del texto para el código */
+        color: #333; /* Color gris oscuro para el código */
+        margin: 3px 0;
+    }
+</style>
+
 </head>
 <body>
     <div class="container">
         <h1>Lista de Productos en Tiempo Real</h1>
         
-        {{!-- Área para mostrar mensajes de estado --}}
-        <div id="statusMessage" style="color: red;"></div>
-
-        <div>
-            <table>
-                <thead>
-                    <tr>
-    
-                        <th>Título</th>
-                        <th>Descripción</th>
-                        <th>Código</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Categoría</th>
-                        <th>Thumbnail</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="productList">
-                    {{#each products}}
-                        <tr>
-                         
-                            <td>{{this.title}}</td>
-                            <td>{{this.description}}</td>
-                            <td>{{this.code}}</td>
-                            <td>{{this.price}}</td>
-                            <td>{{this.stock}}</td>
-                            <td>{{this.category}}</td>
-                            <td><img src="{{this.thumbnails}}" alt="Thumbnail" style="max-width: 100px; max-height: 100px;"></td>
-                            <td>{{this.status}}</td>
-                        </tr>
-                    {{/each}}
-                </tbody>
-            </table>
+        <!-- Contenedor de cuadrícula para las tarjetas de productos -->
+        <div id="productList" class="product-grid">
+            <!-- Tarjetas de productos generadas dinámicamente -->
         </div>
 
-        {{!-- Formulario para agregar un producto --}}
+        <!-- Formulario para agregar un producto -->
         <form id="addProductForm">
             <table>
                 <tr>
@@ -77,7 +103,7 @@
                             <option value="frutossecos">frutossecos</option>
                             <option value="legumbresseca">legumbressecas</option>
                             <option value="frutossecostostados">frutossecostostados</option>
-                            <option value="mixfrutossecos">Nueces</option>
+                            <option value="mixfrutossecos">mixfrutossecos</option>
                         </select>
                     </td>
                 </tr>
@@ -85,27 +111,96 @@
                     <td><label for="thumbnail">Thumbnail:</label></td>
                     <td><input type="text" id="thumbnail" name="thumbnail"></td>
                 </tr>
-                 <tr></tr>
+                <tr>
                     <td><label for="status">Status:</label></td>
-                    <td><input type="boolean" id="status" name="status" value="true"></td>
+                    <td><input type="checkbox" id="status" name="status" value="true"></td>
                 </tr>
-               
             </table>
             <button type="submit">Agregar Producto</button>
-           {{!-- Botón para eliminar producto --}}
             <button type="button" id="deleteProductButton">Eliminar Producto</button>
         </form>
+        <!-- Agregar un campo para seleccionar el producto a modificar -->
+<div>
+    <label for="updateProductId">ID del Producto a Modificar:</label>
+    <input type="text" id="updateProductId" name="updateProductId">
+</div>
 
-        {{!-- Campo para ingresar el ID del producto a eliminar --}}
+<!-- Modificar Producto -->
+<form id="updateProductForm">
+    <table>
+        <tr>
+            <td><label for="updateTitle">Título:</label></td>
+            <td><input type="text" id="updateTitle" name="title" required></td>
+        </tr>
+        <tr>
+            <td><label for="updateDescription">Descripción:</label></td>
+            <td><input type="text" id="updateDescription" name="description" required></td>
+        </tr>
+        <tr>
+            <td><label for="updatePrice">Precio:</label></td>
+            <td><input type="number" id="updatePrice" name="price" required></td>
+        </tr>
+        <tr>
+            <td><label for="updateStock">Stock:</label></td>
+            <td><input type="number" id="updateStock" name="stock" required></td>
+        </tr>
+        <tr>
+            <td><label for="updateCategory">Categoría:</label></td>
+            <td>
+                <select id="updateCategory" name="category" required>
+                    <option value="nuecesysemillas">nuecesysemillas</option>
+                    <option value="frutossecos">frutossecos</option>
+                    <option value="legumbresseca">legumbressecas</option>
+                    <option value="frutossecostostados">frutossecostostados</option>
+                    <option value="mixfrutossecos">mixfrutossecos</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+
+</form>
+
+<!-- Botón de eliminar y modificar -->
+
+     <!-- Campo para ingresar el ID del producto a eliminar -->
         <div>
             <label for="deleteProductId">ID del Producto a Eliminar:</label>
             <input type="text" id="deleteProductId" name="deleteProductId">
         </div>
     </div>
 
+    <button type="submit">Modificar Producto</button>
+
+   
+
+    <!-- Mensaje de estado fijo en la parte inferior -->
+    <div id="statusMessage" style="position: fixed; bottom: 0; width: 100%; background-color: #f8d7da; color: #721c24; text-align: center; padding: 10px; display: none;"></div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        document.getElementById('updateProductForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const productId = document.getElementById('updateProductId').value; // Obtener el ID del producto
+    if (!productId) {
+        alert('Por favor, ingresa un ID de producto válido.');
+        return;
+    }
+
+    // Obtener los datos del formulario
+    const formData = new FormData(event.target);
+    const updatedProduct = {};
+    formData.forEach((value, key) => {
+        updatedProduct[key] = value;
+    });
+
+    // Enviar la solicitud al servidor para actualizar el producto
+    socket.emit('productUpdated', { id: productId, updatedProduct });
+
+    // Limpiar el formulario
+    event.target.reset();
+});
 
         // Manejar el envío del formulario para agregar producto
         document.getElementById('addProductForm').addEventListener('submit', (event) => {
@@ -133,29 +228,35 @@
         document.getElementById('deleteProductButton').addEventListener('click', () => {
             const productId = document.getElementById('deleteProductId').value;
             if (productId) {
-                socket.emit('productDeleted',(productId));
-                // Limpiar el campo de ID
+                socket.emit('productDeleted', productId);
                 document.getElementById('deleteProductId').value = ''; 
             }
         });
 
+        // Actualizar productos en tiempo real
         socket.on('updateProducts', ({ products, message }) => {
-            const productList = document.getElementById('productList');
-            productList.innerHTML = '';
+            products.sort((a, b) => parseInt(a.code) - parseInt(b.code));
 
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';  // Limpiar lista de productos
+
+            // Crear una tarjeta para cada producto
             products.forEach(product => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${product.title}</td>
-                    <td>${product.description}</td>
-                    <td>${product.code}</td>
-                    <td>${product.price}</td>
-                    <td>${product.stock}</td>
-                    <td>${product.category}</td>
-                    <td><img src="${product.thumbnails}" alt="Thumbnail" style="max-width: 100px; max-height: 100px;"></td>
-                    <td>${product.status}</td>
+                const card = document.createElement('div');
+                card.classList.add('product-card');
+                
+                card.innerHTML = `
+                    <img src="${product.thumbnails}" alt="Thumbnail">
+                    <div class="product-title">${product.title}</div>
+                    <div class="product-info">Descripción: ${product.description}</div>
+                    <div class="product-info">Código: ${product.code}</div>
+                    <div class="product-info">Precio: ${product.price}</div>
+                    <div class="product-info">Stock: ${product.stock}</div>
+                    <div class="product-info">Categoría: ${product.category}</div>
+                    <div class="product-info">Status: ${product.status}</div>
                 `;
-                productList.appendChild(tr);
+                
+                productList.appendChild(card);
             });
 
             // Mostrar mensaje de éxito o error si existe

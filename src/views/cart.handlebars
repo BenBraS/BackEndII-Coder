@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito</title>
+    <script src="/js/cart.js" defer></script>
+</head>
+<body>
+    <div>
+        <h1>Carrito de Compras</h1>
+
+        <!-- Verifica si hay productos en el carrito -->
+        {{#if cartProducts.length}}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th>Código</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                   {{#each cartProducts}}
+    <tr>
+        <td>{{this.title}}</td>
+        <td>{{this.description}}</td>
+        <td>{{this.code}}</td>
+        <td>${{this.price}}</td>
+        <td>
+            <button onclick="updateProductQuantity('{{this._id}}', -1)">-</button>
+            {{this.quantity}}
+            <button onclick="updateProductQuantity('{{this._id}}', 1)">+</button>
+        </td>
+        <td>${{this.subtotal}}</td>
+        <td>
+            <button onclick="removeProductFromCart('{{this._id}}')">Eliminar</button>
+        </td>
+    </tr>
+{{/each}}
+                </tbody>
+            </table>
+            <h3>Total: ${{totalPrice}}</h3>
+            <button onclick="checkout()">Finalizar Compra</button>
+        {{else}}
+            <p>No hay productos en tu carrito.</p>
+        {{/if}}
+
+        <br>
+        <a href="/">Seguir Comprando</a>
+    </div>
+</body>
+</html>

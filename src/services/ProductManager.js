@@ -51,17 +51,12 @@ export default class ProductManager {
 
             // Actualiza los campos correspondientes
             if ('stock' in updatedFields) {
-                let currentStock = product.stock;
                 let adjustment = Number(updatedFields.stock);
-
-                // Calcular el nuevo stock
-                let newStock = currentStock + adjustment;
-
-                // Si el stock resultante es negativo, ajustarlo a 0 y establecer el estado en false
+                let newStock = product.stock + adjustment;
                 product.stock = newStock < 0 ? 0 : newStock;
                 product.status = product.stock > 0;
+                delete updatedFields.stock; // Evitar que el stock sea sobrescrito en el Object.assign
             }
-
             Object.assign(product, updatedFields); // Asigna los campos actualizados al producto
             await product.save();
             return product;

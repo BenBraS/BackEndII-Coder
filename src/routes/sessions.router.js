@@ -18,7 +18,6 @@ router.get('/register', (req, res) => {
 });
 
 // Endpoint /register: Crear un nuevo usuario y asociar carrito
-// Endpoint /register: Crear un nuevo usuario y asociar carrito
 router.post('/register', async (req, res) => {
     try {
         const { first_name, last_name, email, age, password } = req.body;
@@ -82,13 +81,13 @@ router.post('/login', async (req, res) => {
     try {
       // Verificar si el usuario existe
       const user = await userManager.getUserByEmail(email);
-    // Log para verificar si el usuario existe
+
   
       if (!user) {
         return res.status(400).send({ message: 'Credenciales incorrectas' });
       }
   
-      // Asegurarnos de que la contraseña ingresada y el hash no tengan caracteres invisibles
+      // Asegurar de que la contraseña ingresada y el hash no tengan caracteres invisibles
       const passwordTrimmed = password.trim();
   
       // Comparar la contraseña con el hash almacenado
@@ -105,7 +104,7 @@ router.post('/login', async (req, res) => {
       // Establecer el token como cookie
       res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
   
-      // Redirigir a /profile 
+      // Redirigir a /profile si el login es exitoso
       return res.redirect('/api/sessions/profile');
   
     } catch (error) {

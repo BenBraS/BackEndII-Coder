@@ -1,5 +1,8 @@
 import {Router} from 'express'
 import CartManager from '../services/CartManager.js'
+import passport from 'passport';
+import { authorizeRole } from '../middlewares/authMiddleware.js';
+
 
 const router = Router();
 const cartManager = new CartManager();
@@ -34,7 +37,7 @@ router.get('/:cid/products', async (req, res) => {
   });
   
   // Agregar un producto a un carrito
-  router.post('/:cid/products/:pid', async (req, res) => {
+  router.post('/:cid/products/:pid', passport.authenticate('jwt', { session: false }), authorizeRole(['user']), async (req, res) => {
     try {
       const { cid, pid } = req.params;
       const { quantity } = req.body;
@@ -117,5 +120,43 @@ router.put('/:cid/products/:pid', async (req, res) => {
     }
   });
   
-  
-  export default router;
+// Obtener el carrito del usuario autenticado
+router.get('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const userId = req.user.id;  // Obtén el userId desde la sesión autenticada
+    const cart = await cartManager.getCartByUserId(userId); 
+
+    if (!cart) {
+      return res.render('cart', { cartProducts: [], totalPrice: 0 });
+    }
+
+    // Mapeo de productos
+    const cartProducts = cart.products.map(product => {
+      const price = product.productId.price || 0;
+      const quantity = product.quantity || 0;
+      const subtotal = price * quantity;
+
+      return {
+        _id: product.productId._id,
+        title: product.productId.title,
+        description: product.productId.description,
+        code: product.productId.code,
+        price,
+        quantity,
+        subtotal
+      };
+    });
+
+    // Calcula el total de todos los productos en el carrito
+    const totalPrice = cartProducts.reduce((total, product) => total + product.subtotal, 0);
+
+    // Renderiza la vista solo una vez
+    res.render('cart', { cartProducts, totalPrice });
+
+  } catch (error) {
+    console.error('Error al obtener el carrito:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export default router;

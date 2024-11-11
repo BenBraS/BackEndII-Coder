@@ -1,5 +1,8 @@
 import { Router } from 'express';
 import ProductManager from '../services/ProductManager.js';
+import { authorizeRole } from '../middlewares/authMiddleware.js';
+import passport from 'passport';
+
 
 const router = Router();
 const p = new ProductManager()
@@ -23,10 +26,8 @@ router.get('/', async (req, res) => {
 });
 
 // Ruta para la vista "realTimeProducts"
-router.get('/realtimeproducts', async (req, res) => {
+router.get('/realtimeproducts', passport.authenticate('jwt', { session: false }), authorizeRole(['admin']), async (req, res) => {
     const products = await p.getAllProducts();
     res.render('realTimeProducts', { products });
 });
-
-
 export default router;

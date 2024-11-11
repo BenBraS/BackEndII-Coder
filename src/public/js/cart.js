@@ -82,3 +82,46 @@
 //     }
 //     showCartProducts();
 // });
+function updateProductQuantity(productId, quantity) {
+    // Verifica si el usuario está autenticado
+    fetch('/api/sessions/current', { method: 'GET' })
+      .then(response => {
+        // Si el estado de la respuesta no es 200, verifica si es un 401 (no autorizado)
+        if (!response.ok) {
+          if (response.status === 401) {
+            // Si no está autenticado, redirigir a la página de login
+            window.location.href = '/api/sessions/login'; // Ajusta la URL según sea necesario
+          } else {
+            // Maneja otros posibles errores de la respuesta
+            throw new Error('Error en la verificación de autenticación');
+          }
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data.user) {
+          // Si no se encuentra un usuario en la respuesta, redirigir a login
+          window.location.href = '/api/sessions/login';
+        } else {
+          // Asegúrate de que el cartId es solo el ID y no un objeto
+          const cartId = data.user.cart._id || data.user.cart; // Aquí se asegura de que cartId sea un string
+  
+          // Si el usuario está autenticado, agregar el producto al carrito
+          fetch(`/api/carts/${cartId}/products/${productId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ quantity: quantity }),
+          })
+            .then(response => response.json())
+            .then(updatedCart => {
+              // Aquí puedes actualizar la interfaz de usuario con el carrito actualizado
+              console.log(updatedCart);
+            })
+            .catch(err => console.error('Error al agregar al carrito:', err));
+        }
+      })
+      .catch(err => console.error('Error al verificar autenticación:', err));
+  }
+  

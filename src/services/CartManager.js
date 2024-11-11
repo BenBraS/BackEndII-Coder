@@ -1,5 +1,6 @@
 import Cart from '../models/carritos.js';
 import Product from '../models/products.js';
+import { User } from '../models/users.js';
 
 class CartManager {
   // Crear un nuevo carrito vacío
@@ -168,6 +169,20 @@ async updateCartWithProducts(cartId, products) {
       throw new Error(`Error al actualizar la cantidad del producto en el carrito: ${error.message}`);
     }
   }
+  // Obtener el carrito de un usuario por su ID
+async getCartByUserId(userId) {
+    try {
+      // Buscar al usuario y obtener su carrito
+      const user = await User.findById(userId).populate('cart');  // Usamos populate para obtener los detalles del carrito
+      if (!user || !user.cart) {
+        throw new Error('Carrito no encontrado para este usuario');
+      }
+      return user.cart;
+    } catch (error) {
+      throw new Error(`Error al obtener el carrito del usuario: ${error.message}`);
+    }
+  }
+
 }
 
 export default CartManager;

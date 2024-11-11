@@ -61,7 +61,7 @@ router.put('/:pid', async (req, res) => {
         const productId = req.params.pid;
         const updatedFields = req.body;
 
-        // Validar stock si está presente
+        // Validar si hay cambios en el stock y convertirlo a número
         if ('stock' in updatedFields) {
             const stockNumber = Number(updatedFields.stock);
             let status = true;
@@ -74,10 +74,11 @@ router.put('/:pid', async (req, res) => {
             updatedFields.status = status;
         }
 
+        // Actualizar el producto
         const updatedProduct = await productManager.updateProduct(productId, updatedFields);
 
         if (updatedProduct) {
-            // Emitir evento de producto actualizado
+            // Emitir el evento de actualización de productos
             const products = await productManager.getAllProducts();
             socketServer.emit('updateProducts', { products, message: 'Producto actualizado exitosamente' });
 
@@ -101,7 +102,7 @@ router.delete('/:pid', async (req, res) => {
         res.status(201).json("succesfull")
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Error al eliminar producto' });
+        res.status(500).json({ error: 'Error al eliminar producto, ingrese ID de BBDD' });
     }
 });
 export default router;
