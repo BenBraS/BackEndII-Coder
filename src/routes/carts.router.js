@@ -9,8 +9,10 @@ import {
     deleteCart, 
     updateCartWithProducts, 
     updateProductQuantityInCart, 
-    getCartByUserId 
+    getCartByUserId,
+    purchaseCart 
 } from '../controllers/cart.controller.js';
+
 
 const router = Router();
 
@@ -39,8 +41,9 @@ router.put('/:cid', updateCartWithProducts);
 // Actualizar solo la cantidad de ejemplares del producto en el carrito
 router.put('/:cid/products/:pid', updateProductQuantityInCart);
 
-// Obtener el carrito del usuario autenticado y calcular el precio total
  //Obtener el carrito del usuario autenticado y calcular el precio total 
 router.get('/', passport.authenticate('jwt', { session: false }), getCartByUserId);
+
+router.post('/:cid/purchase',passport.authenticate('jwt', { session: false }), purchaseCart);
 
 export default router;

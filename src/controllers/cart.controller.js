@@ -1,4 +1,6 @@
 import { cartRepository } from '../services/index.js';
+import Ticket from '../models/ticket.js';
+
 
 export const createCart = async (req, res) => {
     try {
@@ -16,6 +18,57 @@ export const getCartById = async (req, res) => {
         res.send(cart);
     } catch (error) {
         res.status(500).send({ error: error.message });
+    }
+};
+export const purchaseCart = async (req, res) => {
+    try {
+        const cartId = req.params.cid;
+        const cart = await cartRepository.getCartById(cartId);
+        
+        if (!cart) {
+            return res.status(404).json({ message: 'Carrito no encontrado' });
+        }
+
+        let totalAmount = 0;
+        let unavailableProducts = [];
+
+        // Procesar los productos en el carrito
+        for (let item of cart.products) {
+            const product = item.productId;  // Producto desde el carrito
+            if (product.stock >= item.quantity) {
+                // Restar del stock
+                product.stock -= item.quantity;
+                await product.save();
+
+                // Sumar al total de la compra
+                totalAmount += product.price * item.quantity;
+            } else {
+                // Producto no disponible
+                unavailableProducts.push(product._id);
+            }
+        }
+
+        // Filtrar productos no disponibles
+        cart.products = cart.products.filter(item => !unavailableProducts.includes(item.productId._id));
+        await cart.save();
+
+        // Generar un ticket si hubo compra
+        if (totalAmount > 0) {
+            const ticket = new Ticket({
+                amount: totalAmount,
+                purchaser: req.user.email,  // Asumiendo que el correo está en req.user
+            });
+            await ticket.save();
+        }
+
+        res.json({
+            message: 'Compra completada',
+            unavailableProducts,  // Lista de productos no disponibles
+        });
+
+    } catch (error) {
+        console.error(error);  // Imprimir el error completo en consola
+        res.status(500).json({ message: 'Error procesando la compra', error: error.message });
     }
 };
 
@@ -100,4 +153,5 @@ export const getCartByUserId = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+    
 };
