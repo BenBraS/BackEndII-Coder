@@ -1,9 +1,10 @@
 import { Server } from 'socket.io';
-import ProductManager from '../services/ProductManager.js';
-
-const productManager = new ProductManager();
+import ProductManager from '../managers/ProductManager.js'; // Asegúrate de que la ruta sea correcta
+import CartManager from '../managers/CartManager.js';
 
 export default function socketConfig(httpServer) {
+  const productManager = new ProductManager(); // Inicializa dentro de la función
+
   const socketServer = new Server(httpServer, {
     cors: {
       origin: '*', // Permitir todas las solicitudes de origen
@@ -28,7 +29,7 @@ export default function socketConfig(httpServer) {
         socketServer.emit('updateProducts', { products: [], message: 'Error al agregar el producto' });
       }
     });
-
+  
     // Evento de Producto Eliminado
     socket.on('productDeleted', async (Id) => {
       try {
@@ -40,4 +41,6 @@ export default function socketConfig(httpServer) {
       }
     });
   });
+
+  
 }

@@ -1,6 +1,5 @@
-import express from 'express';
-import UserManager from '../services/UserManager.js';
-import CartManager from '../services/CartManager.js';
+import UserManager from '../managers/UserManager.js';
+import CartManager from '../managers/CartManager.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { COOKIE_NAME, COOKIE_OPTIONS } from '../config/passportConfig.js';

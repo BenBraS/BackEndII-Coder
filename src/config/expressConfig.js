@@ -36,7 +36,8 @@ const hbs = handlebars.create({
       allowProtoMethodsByDefault: true
   },
   helpers: {
-      eq: (value1, value2) => value1 === value2 
+      eq: (value1, value2) => value1 === value2,
+      formatCurrency: (value) => value.toFixed(2)
   }
 });
 

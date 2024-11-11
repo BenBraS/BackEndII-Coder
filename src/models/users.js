@@ -33,24 +33,7 @@ userSchema.methods.isValidPassword = async function(password) {
     return bcrypt.compare(password, this.password);
 };
 
-// Función para crear el usuario administrador una sola vez
-async function createAdminUser() {
-    const adminUser = new User({
-        first_name: "Admin",
-        last_name: "User",
-        email: "admin@example.com",
-        age: 30,
-        password: await bcrypt.hash("adminPassword", 10),  // Contraseña "adminPassword" encriptada
-        role: "admin"
-    });
-
-    await adminUser.save();
-    console.log("Usuario administrador creado exitosamente");
-}
-
-// Ejecuta esta función una vez para crear el admin
-// createAdminUser();
 
 const User = mongoose.model('User', userSchema);
 
-export { User, createAdminUser };
+export default User;

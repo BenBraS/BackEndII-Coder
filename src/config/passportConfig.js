@@ -1,5 +1,5 @@
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import UserManager from '../services/UserManager.js'; 
+import UserManager from '../managers/UserManager.js'; 
 import passport from 'passport';
 //CONFIG COOKIES
 export const COOKIE_NAME = 'token';  

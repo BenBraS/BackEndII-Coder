@@ -1,13 +1,13 @@
-import productDaoMongo from '../daoMongo/productDaoMongo.js';
+import ProductDaoMongo from '../daoMongo/productDaoMongo.js';
 
-export default class ProductManager {
+class ProductRepository {
     constructor() {
-        this.service = new productDaoMongo();
+        this.dao = new ProductDaoMongo();
     }
 
     async getAllProducts(limit) {
         try {
-            return await this.service.getAllProducts(limit);
+            return await this.dao.getAllProducts(limit);
         } catch (error) {
             console.error('Error al obtener productos:', error);
             throw error;
@@ -16,7 +16,7 @@ export default class ProductManager {
 
     async getProductById(id) {
         try {
-            return await this.service.getProductById(id);
+            return await this.dao.getProductById(id);
         } catch (error) {
             console.error('Error al obtener el producto:', error);
             throw error;
@@ -25,7 +25,7 @@ export default class ProductManager {
 
     async addProduct(productData) {
         try {
-            return await this.service.addProduct(productData);
+            return await this.dao.addProduct(productData);
         } catch (error) {
             console.error('Error al agregar producto:', error);
             throw error;
@@ -34,7 +34,7 @@ export default class ProductManager {
 
     async updateProduct(id, updatedFields) {
         try {
-            return await this.service.updateProduct(id, updatedFields);
+            return await this.dao.updateProduct(id, updatedFields);
         } catch (error) {
             console.error('Error al actualizar el producto:', error);
             throw error;
@@ -43,7 +43,7 @@ export default class ProductManager {
 
     async deleteProduct(id) {
         try {
-            return await this.service.deleteProduct(id);
+            return await this.dao.deleteProduct(id);
         } catch (error) {
             console.error('Error al eliminar el producto:', error);
             throw error;
@@ -52,9 +52,11 @@ export default class ProductManager {
 
     async getPaginatedProducts(page = 1, limit = 10, category = '', sort = 'title', order = 1) {
         try {
-            return await this.service.getPaginatedProducts(page, limit, category, sort, order);
+            return await this.dao.getPaginatedProducts(page, limit, category, sort, order);
         } catch (error) {
             throw new Error('Error al obtener productos paginados');
         }
     }
 }
+
+export default ProductRepository;

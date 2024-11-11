@@ -1,33 +1,11 @@
 import { Router } from 'express';
-import ProductManager from '../services/ProductManager.js';
+import { renderHome, renderRealTimeProducts } from '../controllers/views.controller.js';
 import { authorizeRole } from '../middlewares/authMiddleware.js';
 import passport from 'passport';
 
-
 const router = Router();
-const p = new ProductManager()
 
-router.get('/', async (req, res) => {
-    // Obtén parámetros de la consulta (query) con valores predeterminados
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const category = req.query.category || ''; // Parámetro de categoría
-    const sort = req.query.sort || 'title'; // Parámetro de ordenamiento
-    const order = req.query.order === 'desc' ? -1 : 1; // Orden ascendente o descendente
+router.get('/', renderHome);
+router.get('/realtimeproducts', passport.authenticate('jwt', { session: false }), authorizeRole(['admin']), renderRealTimeProducts);
 
-    try {
-        // Obtén los productos paginados y filtrados por categoría
-        const result = await p.getPaginatedProducts(page, limit, category, sort, order);
-        res.render('home', { result, category, sort, order });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error al obtener productos');
-    }
-});
-
-// Ruta para la vista "realTimeProducts"
-router.get('/realtimeproducts', passport.authenticate('jwt', { session: false }), authorizeRole(['admin']), async (req, res) => {
-    const products = await p.getAllProducts();
-    res.render('realTimeProducts', { products });
-});
 export default router;
