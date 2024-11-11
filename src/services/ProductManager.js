@@ -1,12 +1,13 @@
-import Product from '../models/products.js'; // Asegúrate de ajustar la ruta según tu estructura
+import productDaoMongo from '../daoMongo/productDaoMongo.js';
 
 export default class ProductManager {
-    constructor() {}
+    constructor() {
+        this.service = new productDaoMongo();
+    }
 
     async getAllProducts(limit) {
         try {
-            const products = await Product.find().limit(limit || 0);
-            return products;
+            return await this.service.getAllProducts(limit);
         } catch (error) {
             console.error('Error al obtener productos:', error);
             throw error;
@@ -15,8 +16,7 @@ export default class ProductManager {
 
     async getProductById(id) {
         try {
-            const product = await Product.findById(id);
-            return product || null;
+            return await this.service.getProductById(id);
         } catch (error) {
             console.error('Error al obtener el producto:', error);
             throw error;
@@ -25,19 +25,7 @@ export default class ProductManager {
 
     async addProduct(productData) {
         try {
-            // Verifica si el producto ya existe por su código
-            const existingProduct = await Product.findOne({ code: productData.code });
-            if (existingProduct) {
-                // Si existe, suma el stock
-                existingProduct.stock += productData.stock;
-                await existingProduct.save();
-                return existingProduct;
-            }
-
-            // Si no existe, crea un nuevo producto
-            const newProduct = new Product(productData);
-            await newProduct.save();
-            return newProduct;
+            return await this.service.addProduct(productData);
         } catch (error) {
             console.error('Error al agregar producto:', error);
             throw error;
@@ -46,20 +34,7 @@ export default class ProductManager {
 
     async updateProduct(id, updatedFields) {
         try {
-            const product = await Product.findById(id);
-            if (!product) return null;
-
-            // Actualiza los campos correspondientes
-            if ('stock' in updatedFields) {
-                let adjustment = Number(updatedFields.stock);
-                let newStock = product.stock + adjustment;
-                product.stock = newStock < 0 ? 0 : newStock;
-                product.status = product.stock > 0;
-                delete updatedFields.stock; // Evitar que el stock sea sobrescrito en el Object.assign
-            }
-            Object.assign(product, updatedFields); // Asigna los campos actualizados al producto
-            await product.save();
-            return product;
+            return await this.service.updateProduct(id, updatedFields);
         } catch (error) {
             console.error('Error al actualizar el producto:', error);
             throw error;
@@ -68,29 +43,18 @@ export default class ProductManager {
 
     async deleteProduct(id) {
         try {
-            const deletedProduct = await Product.findByIdAndDelete(id);
-            return deletedProduct || null;
+            return await this.service.deleteProduct(id);
         } catch (error) {
             console.error('Error al eliminar el producto:', error);
             throw error;
         }
     }
+
     async getPaginatedProducts(page = 1, limit = 10, category = '', sort = 'title', order = 1) {
         try {
-            const options = {
-                page: page,
-                limit: limit,
-                lean: true, // Para resultados planos
-                sort: { [sort]: order } // Ordenar por campo dinámico
-            };
-    
-            const filter = category ? { category: category } : {}; // Aplicar filtro de categoría si existe
-            const result = await Product.paginate(filter, options); // Usar el filtro en la consulta
-            return result;
+            return await this.service.getPaginatedProducts(page, limit, category, sort, order);
         } catch (error) {
             throw new Error('Error al obtener productos paginados');
         }
     }
-    
-
 }

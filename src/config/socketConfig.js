@@ -4,7 +4,12 @@ import ProductManager from '../services/ProductManager.js';
 const productManager = new ProductManager();
 
 export default function socketConfig(httpServer) {
-  const socketServer = new Server(httpServer);
+  const socketServer = new Server(httpServer, {
+    cors: {
+      origin: '*', // Permitir todas las solicitudes de origen
+      methods: ['GET', 'POST'],
+    },
+  });
 
   socketServer.on('connection', async (socket) => {
     console.log('Nuevo cliente conectado');
